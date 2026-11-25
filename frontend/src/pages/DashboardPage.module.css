@@ -1,0 +1,35 @@
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: var(--space-4);
+}
+
+.shortcut {
+  text-decoration: none;
+  color: inherit;
+}
+
+.shortcut:hover > section {
+  border-color: var(--color-secondary);
+  box-shadow: var(--shadow-md);
+}
+
+.shortcutBody {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.icon {
+  color: var(--color-secondary);
+}
+
+.label {
+  flex: 1;
+  font-weight: 600;
+  color: var(--color-primary-dark);
+}
+
+.arrow {
+  color: var(--color-text-muted);
+}

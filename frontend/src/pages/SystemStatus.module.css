@@ -1,0 +1,189 @@
+.page {
+  min-height: 100vh;
+  max-width: 880px;
+  margin: 0 auto;
+  padding: var(--space-6) var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.header {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  border-radius: 999px;
+  background: var(--color-primary-dark);
+  color: #fff;
+}
+
+.brandName {
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.title {
+  font-size: var(--text-2xl);
+  max-width: 640px;
+}
+
+.subtitle {
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+.grid {
+  display: grid;
+  gap: var(--space-4);
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+
+.card {
+  display: flex;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-left-width: 4px;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+}
+
+.card.ok {
+  border-left-color: var(--color-success);
+}
+
+.card.error {
+  border-left-color: var(--color-danger);
+}
+
+.card.loading {
+  border-left-color: var(--color-warning);
+}
+
+.cardIcon {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: var(--radius-sm);
+  background: var(--color-bg);
+  color: var(--color-primary);
+}
+
+.cardBody {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.cardTitle {
+  font-size: var(--text-base);
+}
+
+.cardMessage {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-sm);
+  font-weight: 600;
+}
+
+.ok .cardMessage {
+  color: var(--color-success);
+}
+
+.error .cardMessage {
+  color: var(--color-danger);
+}
+
+.loading .cardMessage {
+  color: var(--color-text-muted);
+}
+
+.cardDetail {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  overflow-wrap: anywhere;
+}
+
+.actions {
+  display: flex;
+  justify-content: center;
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-5);
+  border: none;
+  border-radius: var(--radius-sm);
+  background: var(--color-primary);
+  color: #fff;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.button:hover:not(:disabled) {
+  background: var(--color-primary-dark);
+}
+
+.button:disabled {
+  opacity: 0.7;
+  cursor: progress;
+}
+
+.summaryOk,
+.summaryError {
+  text-align: center;
+  font-size: var(--text-sm);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-sm);
+}
+
+.summaryOk {
+  color: var(--color-success);
+  background: rgba(25, 135, 84, 0.08);
+}
+
+.summaryError {
+  color: var(--color-danger);
+  background: rgba(220, 53, 69, 0.08);
+}
+
+.summaryError code {
+  background: rgba(220, 53, 69, 0.12);
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+
+.footer {
+  margin-top: auto;
+  text-align: center;
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}
+
+.spin {
+  animation: spin 0.9s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

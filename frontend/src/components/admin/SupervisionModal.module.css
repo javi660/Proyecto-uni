@@ -1,0 +1,62 @@
+.wrapper {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.center {
+  display: flex;
+  justify-content: center;
+  padding: var(--space-5);
+}
+
+.fieldset {
+  display: grid;
+  gap: var(--space-1);
+  max-height: 280px;
+  overflow-y: auto;
+  margin: 0;
+  padding: var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+}
+
+.legend {
+  padding: 0 var(--space-2);
+  font-size: var(--text-sm);
+  font-weight: 600;
+}
+
+.option {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: var(--text-sm);
+}
+
+.option:hover {
+  background: var(--color-bg);
+}
+
+.option input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--color-primary);
+}
+
+.inactive {
+  color: var(--color-text-muted);
+}
+
+.count {
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-2);
+}
