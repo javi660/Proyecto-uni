@@ -2,7 +2,7 @@ import axios from 'axios';
 
 /**
  * Cliente HTTP único hacia el backend.
- * - Usa la ruta relativa "/api" (en desarrollo Vite la reenvía al backend).
+ * - En desarrollo usa "/api" (Vite lo reenvía al backend); en producción usa VITE_API_URL.
  * - Envía cookies (sesión HttpOnly de la Fase 3).
  * - CSRF: en toda petición que cambia datos agrega la cabecera X-CSRF-Token con el valor de la
  *   cookie `sgssu_csrf`; si aún no existe, la solicita a GET /auth/csrf.
@@ -86,8 +86,10 @@ export function readCookie(name) {
   return found ? decodeURIComponent(found.slice(prefix.length)) : null;
 }
 
+const API_BASE_URL = (import.meta.env.VITE_API_URL || '/api').replace(/\/+$/, '');
+
 const api = axios.create({
-  baseURL: '/api',
+  baseURL: API_BASE_URL,
   withCredentials: true,
   timeout: 15000,
   headers: { Accept: 'application/json' },
@@ -95,7 +97,7 @@ const api = axios.create({
 
 // Cliente "crudo" (sin interceptores) para pedir CSRF y renovar sin recursión
 const raw = axios.create({
-  baseURL: '/api',
+  baseURL: API_BASE_URL,
   withCredentials: true,
   timeout: 15000,
   headers: { Accept: 'application/json' },
