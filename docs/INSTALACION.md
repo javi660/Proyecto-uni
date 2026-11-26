@@ -1,12 +1,12 @@
 # Instalación, configuración de Supabase y despliegue
 
-> Qué está verificado: la instalación local con PostgreSQL y las pruebas se ejecutaron realmente. Las secciones de **Supabase** y **despliegue** describen los pasos esperados según el diseño y la documentación de cada servicio, pero **no se han ejecutado contra tu proyecto de Supabase ni en un hosting real**. Cada paso que no pude comprobar está marcado como *sin verificar*.
+> Verificación actual: los dos dominios de Render responden; `/api/health`, `/api/health/db` y el preflight CORS desde el frontend respondieron correctamente. Esto no sustituye una prueba de inicio de sesión o de subida de adjuntos. La configuración de cookies modificada aquí requiere volver a desplegar el backend.
 
 ## 1. Requisitos
 
 - Node.js 20 o superior (probado con 22) y npm.
 - Una base PostgreSQL: la de un proyecto Supabase o una local (PostgreSQL 16 en las pruebas).
-- Para el despliegue: un servidor o servicio donde correr Node.js, y un lugar para servir los archivos estáticos del frontend, ambos bajo **el mismo dominio** (ver sección 5).
+- Para el despliegue: un servicio Node.js para el backend y un hosting estático para el frontend. Pueden tener dominios distintos si CORS y las cookies entre sitios están configurados como en la sección 5.
 
 ## 2. Instalación local
 
@@ -26,7 +26,7 @@ cp .env.example .env          # Windows: copy .env.example .env
 |---|---|---|
 | `NODE_ENV` | sí | `development`, `test` o `production`. |
 | `PORT` | no | Puerto del API (4000 por defecto). |
-| `CORS_ORIGINS` | sí | Orígenes permitidos separados por comas (en desarrollo, `http://localhost:5173`; en producción, el dominio del sitio con `https://`). |
+| `CORS_ORIGINS` | sí | Orígenes permitidos separados por comas. Incluye `http://localhost:5173` para desarrollo y `https://proyecto-uni-1.onrender.com` para producción. |
 | `DATABASE_URL` | sí | Cadena de conexión PostgreSQL. No agregues `?sslmode=`; el SSL se controla con `DB_SSL`. Si la contraseña tiene `@ : / # ?`, codifícala (URL-encode). |
 | `TEST_DATABASE_URL` | solo pruebas | Base **distinta** de la real para las pruebas de integración (se reinicia en cada ejecución). |
 | `DB_SSL` | no | `require` (por defecto; para Supabase), `verify` (con `DB_SSL_CA`) o `disable` (PostgreSQL local). |
@@ -40,7 +40,7 @@ cp .env.example .env          # Windows: copy .env.example .env
 
 > La clave `SUPABASE_SERVICE_ROLE_KEY` da acceso total a tu proyecto: solo va en el backend, nunca en el frontend ni en Git.
 
-El frontend tiene un solo ajuste opcional, `VITE_API_PROXY_TARGET` (por defecto `http://localhost:4000`), que solo afecta al servidor de desarrollo. Las variables `VITE_*` son visibles en el navegador: no pongas secretos.
+En desarrollo, el frontend usa `VITE_API_PROXY_TARGET` (por defecto `http://localhost:4000`) para el proxy de Vite. En producción, el API por defecto es `https://proyecto-uni-2eqo.onrender.com/api`; se puede sustituir con `VITE_API_URL` en el entorno de compilación del frontend. Las variables `VITE_*` son visibles en el navegador: no pongas secretos.
 
 ### 2.2 Base de datos
 
@@ -94,11 +94,11 @@ npm run build        # genera frontend/dist
 npm run preview      # vista previa local (no es un servidor de producción)
 ```
 
-## 5. Despliegue (sin verificar en un hosting real)
+## 5. Despliegue en Render
 
-### 5.1 Principio: un solo origen
+### 5.1 Dominios de producción
 
-El frontend llama siempre a rutas relativas `/api`, y las cookies de sesión son `SameSite=Lax`. Por eso el sitio y la API deben verse bajo **el mismo dominio**: el servidor web que sirve `frontend/dist` debe reenviar `/api` al backend. Si el frontend y el backend viven en dominios distintos, las cookies de sesión no funcionarán sin cambios de código.
+El frontend publicado es `https://proyecto-uni-1.onrender.com` y el backend es `https://proyecto-uni-2eqo.onrender.com`. En producción, las llamadas API van directamente a `https://proyecto-uni-2eqo.onrender.com/api`; en desarrollo, Vite conserva el proxy local `/api`. Como los dominios de Render son distintos, el backend debe permitir el origen del frontend en `CORS_ORIGINS` y las cookies de sesión se envían con `SameSite=None; Secure`.
 
 Ejemplo con Nginx (adáptalo a tu servidor):
 
@@ -126,18 +126,18 @@ server {
 
 Los servicios de hosting estático que permiten *rewrites/proxy* hacia otro servidor pueden cumplir el mismo papel; consulta su documentación.
 
-### 5.2 Variables del backend en producción
+### 5.2 Variables del backend en Render
 
 ```
 NODE_ENV=production
 PORT=4000
-CORS_ORIGINS=https://sgssu.ejemplo.edu
+CORS_ORIGINS=https://proyecto-uni-1.onrender.com
 DATABASE_URL=<cadena de Supabase>
 DB_SSL=require
 JWT_ACCESS_SECRET=<48+ bytes aleatorios, exclusivo de producción>
 JWT_REFRESH_SECRET=<otro distinto>
 COOKIE_SECURE=true
-TRUST_PROXY=1            # número de proxies entre el cliente y Node (1 con un solo Nginx/balanceador)
+TRUST_PROXY=1            # ajusta al número de proxies configurado en el hosting
 BCRYPT_COST=12
 SUPABASE_URL=...
 SUPABASE_SERVICE_ROLE_KEY=...
@@ -146,7 +146,9 @@ STORAGE_BUCKET=sgssu-adjuntos
 
 - `TRUST_PROXY` debe reflejar la cantidad real de proxies: si es menor, el límite de intentos de login y la auditoría verían la IP del proxy; si es mayor, un cliente podría falsificar su IP.
 - Los secretos JWT de producción deben ser distintos de los de desarrollo. Cambiarlos cierra todas las sesiones.
-- Arranque: `cd backend && npm ci --omit=dev && npm start`. Usa un gestor de procesos (por ejemplo systemd o el del hosting) para reiniciarlo.
+- Configura las variables secretas y la conexión a la base de datos en el panel de Render; nunca las guardes en el repositorio. `COOKIE_SECURE=true` es obligatorio en producción.
+- En el Static Site del frontend, compila desde `frontend` con `npm install && npm run build`. Si defines `VITE_API_URL`, pon `https://proyecto-uni-2eqo.onrender.com/api`; si no, el frontend usa esa dirección por defecto.
+- El backend debe arrancar con `npm start` desde `backend` y tener `CORS_ORIGINS=https://proyecto-uni-1.onrender.com`.
 - Antes del primer arranque en producción: `npm run db:apply`, `npm run db:migrate`, `npm run db:verify` y `npm run user:create`.
 
 ### 5.3 Cabeceras del frontend
@@ -170,6 +172,6 @@ El backend envía cabeceras de seguridad (helmet) en `/api`, pero los archivos e
 | `password authentication failed` | Contraseña mal copiada o sin URL-encode. |
 | El backend no inicia en producción | `COOKIE_SECURE` no es `true`, o los secretos JWT son cortos o iguales. |
 | 403 `CSRF_INVALID` en peticiones que cambian datos | Falta la cabecera `X-CSRF-Token` (el frontend la envía solo; al probar con `curl` pídela en `GET /api/auth/csrf`). |
-| Sesión que no se mantiene tras desplegar | Frontend y API en dominios distintos o sin `COOKIE_SECURE`/HTTPS. |
+| Sesión que no se mantiene tras desplegar | Revisa `CORS_ORIGINS`, `COOKIE_SECURE=true` y que las cookies de producción usen `SameSite=None; Secure`. |
 | `db:apply` se niega | El esquema ya existe; usa `--seed-only` o `db:reset` (borra datos). |
 | Un adjunto da error de Storage | Bucket inexistente, nombre distinto de `STORAGE_BUCKET` o clave `service_role` incorrecta. |

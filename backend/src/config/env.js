@@ -27,7 +27,9 @@ const optionalSecret = z.preprocess(
 const baseSchema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
   PORT: z.coerce.number().int().min(1).max(65535).default(4000),
-  CORS_ORIGINS: z.string().default('http://localhost:5173'),
+  CORS_ORIGINS: z
+    .string()
+    .default('http://localhost:5173,https://proyecto-uni-1.onrender.com'),
 
   DATABASE_URL: optionalString,
   TEST_DATABASE_URL: optionalString,

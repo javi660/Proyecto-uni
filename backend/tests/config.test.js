@@ -11,7 +11,10 @@ describe('loadEnv', () => {
     expect(config.PORT).toBe(4000);
     expect(config.DB_SSL).toBe('require');
     expect(config.COOKIE_SECURE).toBe(false);
-    expect(config.CORS_ORIGINS_LIST).toEqual(['http://localhost:5173']);
+    expect(config.CORS_ORIGINS_LIST).toEqual([
+      'http://localhost:5173',
+      'https://proyecto-uni-1.onrender.com',
+    ]);
     expect(config.DATABASE_URL).toBeUndefined();
   });
 

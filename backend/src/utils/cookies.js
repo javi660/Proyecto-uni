@@ -5,13 +5,17 @@ const { authConfig } = require('../config/auth');
 
 /**
  * Cookies de sesión:
- *  - Access y refresh: HttpOnly (JavaScript no puede leerlas), SameSite=Lax y Secure según COOKIE_SECURE.
+ *  - Access y refresh: HttpOnly; SameSite=None en producción y Lax en desarrollo.
  *  - CSRF: legible por el frontend (debe copiarla a la cabecera X-CSRF-Token).
  *  - El refresh solo se envía a /api/auth.
  */
 
 function baseOptions() {
-  return { httpOnly: true, secure: env.COOKIE_SECURE, sameSite: 'lax' };
+  return {
+    httpOnly: true,
+    secure: env.COOKIE_SECURE,
+    sameSite: env.IS_PRODUCTION ? 'none' : 'lax',
+  };
 }
 
 /**
@@ -42,7 +46,7 @@ function setCsrfCookie(res, token) {
   res.cookie(authConfig.cookies.csrf, token, {
     httpOnly: false,
     secure: env.COOKIE_SECURE,
-    sameSite: 'lax',
+    sameSite: env.IS_PRODUCTION ? 'none' : 'lax',
     path: '/',
     maxAge: authConfig.csrfTtlMs,
   });
